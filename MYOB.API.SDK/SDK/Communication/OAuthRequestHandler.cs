@@ -25,7 +25,7 @@ namespace MYOB.AccountRight.SDK.Communication
         /// Constructs an OAuth request handler
         /// </summary>
         /// <param name="configuration"></param>
-        public OAuthRequestHandler(IApiConfiguration configuration) : base(new ApiRequestHelper())
+        public OAuthRequestHandler(IApiConfiguration configuration) : base(new ApiRequestHelper(), configuration.CustomLoggingStorageConnectionString)
         {
             _configuration = configuration;
         }
@@ -145,7 +145,7 @@ namespace MYOB.AccountRight.SDK.Communication
 #if ASYNC
         async private Task<Tuple<HttpStatusCode, string, OAuthTokens>> BeginRequestAsync(WebRequest request, string data, CancellationToken cancellationToken)
         {
-            return await GetResponseTask<OAuthTokens>(await GetRequestStreamTask(request, data), cancellationToken);
+            return await GetResponseTask<OAuthTokens>(await GetRequestStreamTask(request, data), data, cancellationToken);
         }
 
         private static async Task<WebRequest> GetRequestStreamTask(WebRequest request, string data)

@@ -32,7 +32,7 @@ namespace MYOB.AccountRight.SDK.Communication
         /// <param name="oauth"></param>
         public ApiRequestHandler(IApiConfiguration configuration, ICompanyFileCredentials credentials,
                                  OAuthTokens oauth = null)
-            : base(new ApiRequestHelper())
+            : base(new ApiRequestHelper(), configuration.CustomLoggingStorageConnectionString)
         {
             _oauth = oauth;
             _configuration = configuration;
@@ -88,7 +88,7 @@ namespace MYOB.AccountRight.SDK.Communication
             ApiRequestHelper.SetStandardHeaders(request, _configuration, _credentials, _oauth);
             ApiRequestHelper.SetIsNoneMatch(request, eTag);
 
-            var get = await GetResponseTask<T>(request, cancellationToken);
+            var get = await GetResponseTask<T>(request, null, cancellationToken);
             return new Tuple<HttpStatusCode, T>(get.Item1, get.Item3);
         }
 #endif
@@ -133,7 +133,7 @@ namespace MYOB.AccountRight.SDK.Communication
         {
             ApiRequestHelper.SetStandardHeaders(request, _configuration, _credentials, _oauth);
             request.Method = "DELETE";
-            await GetResponseTask<string>(request, cancellationToken);
+            await GetResponseTask<string>(request, null, cancellationToken);
         }
 #endif
 
@@ -205,7 +205,7 @@ namespace MYOB.AccountRight.SDK.Communication
             request.ContentType = "application/json";
             var res = await GetRequestStreamTask(request, entity);
 
-            return (await GetResponseTask<T>(res, cancellationToken)).Item2;
+            return (await GetResponseTask<T>(res, entity.ToJson(), cancellationToken)).Item2;
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace MYOB.AccountRight.SDK.Communication
 
             var res = await GetRequestStreamTask(request, entity);
 
-            return (await GetResponseTask<TResponseEntity>(res, cancellationToken)).Item3;
+            return (await GetResponseTask<TResponseEntity>(res, entity.ToJson(), cancellationToken)).Item3;
         }
 #endif
 
@@ -316,7 +316,7 @@ namespace MYOB.AccountRight.SDK.Communication
             request.ContentType = "application/json";
             var res = await GetRequestStreamTask(request, entity);
 
-            return (await GetResponseTask<T>(res, cancellationToken)).Item2;
+            return (await GetResponseTask<T>(res, entity.ToJson(), cancellationToken)).Item2;
         }
 
         /// <summary>
@@ -353,7 +353,7 @@ namespace MYOB.AccountRight.SDK.Communication
 
             var res = await GetRequestStreamTask(request, entity);
             
-            return (await GetResponseTask<TResponseEntity>(res, cancellationToken)).Item3;
+            return (await GetResponseTask<TResponseEntity>(res, entity.ToJson(), cancellationToken)).Item3;
         }
 #endif
 

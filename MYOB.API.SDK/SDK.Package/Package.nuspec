@@ -22,7 +22,7 @@
     <licenseUrl>https://github.com/MYOB-Technology/AccountRight_Live_API_.Net_SDK/blob/master/LICENSE</licenseUrl>
     <copyright>Copyright MYOB Technology Pty. Ltd. 2013-2015</copyright>
     <dependencies>
-      <group targetFramework="net35">
+      <!--<group targetFramework="net35">
         <dependency id="Newtonsoft.Json" version="7.0.1" />
       </group>
       <group targetFramework="net40">
@@ -30,17 +30,17 @@
         <dependency id="Microsoft.Bcl" version="1.1.10" />
         <dependency id="Microsoft.Bcl.Async" version="1.0.168" />
         <dependency id="Microsoft.Bcl.Build" version="1.0.21" />
-      </group>
+      </group>-->
       <group targetFramework="net45">
         <dependency id="Newtonsoft.Json" version="7.0.1" />
       </group>
-      <group targetFramework="portable-net45+win+wpa81+wp80">
+      <!--<group targetFramework="portable-net45+win+wpa81+wp80">
         <dependency id="Newtonsoft.Json" version="7.0.1" />
         <dependency id="Microsoft.Bcl" version="1.1.10" />
         <dependency id="Microsoft.Bcl.Async" version="1.0.168" />
         <dependency id="Microsoft.Bcl.Build" version="1.0.21" />
         <dependency id="Microsoft.Bcl.Compression" version="3.9.85" />
-      </group>
+      </group>-->
     </dependencies>
     <references></references>
     <tags>MYOB AccountRight SDK Portable linqpad-samples</tags>
@@ -51,7 +51,7 @@
     <file src="tools\" target="tools" />
     <file src="content\" target="content" />
     -->
-    <file src="..\..\Artefacts\SDK\Ship\MYOB.AccountRight.SDK.dll" target="lib\portable-net4+sl4+wp7+win8" />
+    <!--<file src="..\..\Artefacts\SDK\Ship\MYOB.AccountRight.SDK.dll" target="lib\portable-net4+sl4+wp7+win8" />
 	  <file src="..\..\Artefacts\SDK\Ship\MYOB.AccountRight.SDK.pdb" target="lib\portable-net4+sl4+wp7+win8" />
     <file src="..\..\Artefacts\SDK\Ship\MYOB.AccountRight.SDK.xml" target="lib\portable-net4+sl4+wp7+win8" />
     <file src="..\..\Artefacts\SDK\Ship\NET35\MYOB.AccountRight.SDK.dll" target="lib\net35" />
@@ -59,7 +59,7 @@
     <file src="..\..\Artefacts\SDK\Ship\NET35\MYOB.AccountRight.SDK.xml" target="lib\net35" />
     <file src="..\..\Artefacts\SDK\Ship\NET40\MYOB.AccountRight.SDK.dll" target="lib\net40" />
     <file src="..\..\Artefacts\SDK\Ship\NET40\MYOB.AccountRight.SDK.pdb" target="lib\net40" />
-    <file src="..\..\Artefacts\SDK\Ship\NET40\MYOB.AccountRight.SDK.xml" target="lib\net40" />
+    <file src="..\..\Artefacts\SDK\Ship\NET40\MYOB.AccountRight.SDK.xml" target="lib\net40" />-->
     <file src="..\..\Artefacts\SDK\Ship\NET45\MYOB.AccountRight.SDK.dll" target="lib\net45" />
     <file src="..\..\Artefacts\SDK\Ship\NET45\MYOB.AccountRight.SDK.pdb" target="lib\net45" />
     <file src="..\..\Artefacts\SDK\Ship\NET45\MYOB.AccountRight.SDK.xml" target="lib\net45" />

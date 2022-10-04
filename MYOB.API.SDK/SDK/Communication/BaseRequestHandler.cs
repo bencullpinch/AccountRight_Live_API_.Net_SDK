@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using MYOB.AccountRight.SDK.Contracts;
@@ -26,13 +27,16 @@ namespace MYOB.AccountRight.SDK.Communication
         /// </summary>
         protected readonly IApiRequestHelper ApiRequestHelper;
 
+        protected readonly CustomLogging CustomLogging;
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="apiRequestHelper"></param>
-        protected BaseRequestHandler(IApiRequestHelper apiRequestHelper)
+        protected BaseRequestHandler(IApiRequestHelper apiRequestHelper, string storageConnectionString)
         {
             ApiRequestHelper = apiRequestHelper;
+            CustomLogging = new CustomLogging(storageConnectionString);
         }
 
         /// <summary>
@@ -69,9 +73,9 @@ namespace MYOB.AccountRight.SDK.Communication
         /// <typeparam name="T"></typeparam>
         /// <param name="request"></param>
         /// <returns></returns>
-        protected Task<Tuple<HttpStatusCode, string, T>> GetResponseTask<T>(WebRequest request) where T : class
+        protected Task<Tuple<HttpStatusCode, string, T>> GetResponseTask<T>(WebRequest request, string requestBody) where T : class
         {
-            return GetResponseTask<T>(request, CancellationToken.None);
+            return GetResponseTask<T>(request, requestBody, CancellationToken.None);
         }
 
         /// <summary>
@@ -81,19 +85,28 @@ namespace MYOB.AccountRight.SDK.Communication
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected async Task<Tuple<HttpStatusCode, string, T>> GetResponseTask<T>(WebRequest request, CancellationToken cancellationToken) where T : class
+        protected async Task<Tuple<HttpStatusCode, string, T>> GetResponseTask<T>(WebRequest request, string requestBody, CancellationToken cancellationToken) where T : class
         {
             T entity = null;
             string location = null;
             var statusCode = HttpStatusCode.Unused;
+            
+            var start = Stopwatch.GetTimestamp();
+
             try
             {
                 var response = await request.GetResponseAsync(cancellationToken);
-                entity = ExtractDetails<T>(response, out location, out statusCode);                
+                var result = ExtractDetails<T>(response, out location, out statusCode);
+                entity = result.Item1;
+                var finish = Stopwatch.GetTimestamp();
+
+                await CustomLogging.LogHttp(request.Method, request.RequestUri.AbsoluteUri, requestBody, (int)response.StatusCode, result.Item2, start, finish);
             }
             catch (Exception wex)
             {
                 wex.ProcessException(request.RequestUri);
+
+                CustomLogging.LogHttpFailure(request.Method, request.RequestUri.AbsoluteUri, requestBody, wex, start);
             }
             return new Tuple<HttpStatusCode, string, T>(statusCode, location, entity);
         }
@@ -113,6 +126,8 @@ namespace MYOB.AccountRight.SDK.Communication
             var request = requestData.Request;
             var uri = request.RequestUri;
 
+            var start = Stopwatch.GetTimestamp();
+
             try
             {
                 var response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
@@ -120,12 +135,18 @@ namespace MYOB.AccountRight.SDK.Communication
                 string location;
                 HttpStatusCode statusCode;
                 var entity = ExtractDetails<TResp>(response, out location, out statusCode);
+                var finish = Stopwatch.GetTimestamp();
 
-                requestData.OnComplete(response.StatusCode, location, entity);
+                CustomLogging
+                    .LogHttp(request.Method, request.RequestUri.AbsoluteUri, requestData.Body, (int)response.StatusCode,
+                        entity.Item2, start, finish).GetAwaiter().GetResult();
+
+                requestData.OnComplete(response.StatusCode, location, entity.Item1);
             }
             catch (Exception ex)
             {
                 requestData.OnError(uri, ex);
+                CustomLogging.LogHttpFailure(request.Method, request.RequestUri.AbsoluteUri, requestData.Body, ex, start);
             }
         }
 
@@ -143,7 +164,7 @@ namespace MYOB.AccountRight.SDK.Communication
             }
         }
 
-        private T ExtractDetails<T>(HttpWebResponse response, out string location, out HttpStatusCode statusCode)
+        private Tuple<T, string> ExtractDetails<T>(HttpWebResponse response, out string location, out HttpStatusCode statusCode)
             where T : class
         {
             location = response.Headers["Location"];
@@ -157,19 +178,21 @@ namespace MYOB.AccountRight.SDK.Communication
             return entity;
         }
 
-        private static TResp ExtractJSonEntity<TResp>(WebResponse response)
+        private static Tuple<TResp, string> ExtractJSonEntity<TResp>(WebResponse response)
         {
-           return ExtractBody(response).FromJson<TResp>();
+            var rawResponse = ExtractBody(response);
+            return new Tuple<TResp, string>(rawResponse.FromJson<TResp>(), rawResponse);
         }
 
-        private static TResp ExtractJSonCompressedEntity<TResp>(WebResponse response)
+        private static Tuple<TResp, string> ExtractJSonCompressedEntity<TResp>(WebResponse response)
         {
             var responseStream = response.GetResponseStream();
             using (var decompress = new GZipStream(responseStream, CompressionMode.Decompress))
             {
                 using (var reader = new StreamReader(decompress))
                 {
-                    return reader.ReadToEnd().FromJson<TResp>();
+                    var rawResponse = reader.ReadToEnd();
+                    return new Tuple<TResp, string>(rawResponse.FromJson<TResp>(), rawResponse);
                 }
             }
         }

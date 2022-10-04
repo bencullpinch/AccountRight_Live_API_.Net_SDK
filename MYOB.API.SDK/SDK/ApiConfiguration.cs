@@ -39,13 +39,14 @@ namespace MYOB.AccountRight.SDK
         /// <param name="redirectUrl">The redirect uri for the application (OAuth related)</param>
         /// <param name="apiBaseUrl">The AccountRight API endpoint, defaults to 'https://api.myob.com/accountright'</param>
         /// <param name="generateUris">Should the returned entities have the <see cref="BaseEntity.URI"/> and <see cref="BaseLink.URI"/> fields populated</param>
-        public ApiConfiguration(string clientId, string clientSecret, string redirectUrl, string apiBaseUrl = "https://api.myob.com/accountright", bool generateUris = true)
+        public ApiConfiguration(string clientId, string clientSecret, string redirectUrl, string apiBaseUrl = "https://api.myob.com/accountright", bool generateUris = true, string customLoggingStorageConnectionString = null)
         {
             ApiBaseUrl = apiBaseUrl;
             ClientId = clientId;
             ClientSecret = clientSecret;
             RedirectUrl = redirectUrl;
             GenerateUris = generateUris;
+            CustomLoggingStorageConnectionString = customLoggingStorageConnectionString;
         }
 
         /// <summary>
@@ -79,6 +80,11 @@ namespace MYOB.AccountRight.SDK
         /// Should the returned entities have the <see cref="BaseEntity.URI"/> and <see cref="BaseLink.URI"/> fields populated
         /// </summary>
         public bool GenerateUris { get; private set; }
+
+        /// <summary>
+        /// An azure blob storage connection string to store large logs
+        /// </summary>
+        public string CustomLoggingStorageConnectionString { get; private set; }
 
 #if !PORTABLE
         /// <summary>

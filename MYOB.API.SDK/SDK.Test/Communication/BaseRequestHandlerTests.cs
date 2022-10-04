@@ -12,7 +12,7 @@ namespace SDK.Test.Communication
     {
         private readonly IWebRequestFactory _webRequestFactory;
 
-        public TestBaseRequestHandler(IWebRequestFactory webRequestFactory) : base(new ApiRequestHelper())
+        public TestBaseRequestHandler(IWebRequestFactory webRequestFactory) : base(new ApiRequestHelper(), "http://localhost")
         {
             _webRequestFactory = webRequestFactory;
         }
@@ -27,7 +27,7 @@ namespace SDK.Test.Communication
         async public Task<Tuple<HttpStatusCode, UserContract>> MakeRequestAsync(string uri)
         {
             var request = _webRequestFactory.Create(new Uri(uri));
-            var get = await GetResponseTask<UserContract>(request);
+            var get = await GetResponseTask<UserContract>(request, null);
             return new Tuple<HttpStatusCode, UserContract>(get.Item1, get.Item3);
         }
     }

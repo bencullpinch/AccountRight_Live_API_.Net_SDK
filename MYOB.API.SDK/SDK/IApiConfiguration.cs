@@ -41,5 +41,7 @@ namespace MYOB.AccountRight.SDK
         /// Should the returned entities have the link Uris populated
         /// </summary>
         bool GenerateUris { get; }
+
+        string CustomLoggingStorageConnectionString { get; }
     }
 }
